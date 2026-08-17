@@ -25,8 +25,8 @@ extension Target.Dependency {
 let package = Package(
     name: "swift-time-based-one-time-password",
     platforms: [
-        .macOS(.v26),
-        .iOS(.v26)
+        .macOS("27"),
+        .iOS("27")
     ],
     products: [
         .library(name: .totp, targets: [.totp]),
