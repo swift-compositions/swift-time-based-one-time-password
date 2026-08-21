@@ -1,16 +1,8 @@
-//
-//  TOTP+Migration.swift
-//  swift-one-time-password
-//
-//  Created by Coen ten Thije Boonkkamp on 2025-08-20.
-//
-
 import Foundation
 import OneTimePasswordShared
 
-/// Migration support for Google Authenticator and other apps
 extension TOTP {
-    /// Migration parameters for various authenticator apps
+
     public struct MigrationParameters {
         public let secret: String
         public let issuer: String
@@ -36,10 +28,6 @@ extension TOTP {
         }
     }
 
-    /// Creates a TOTP from migration parameters
-    /// - Parameter params: Migration parameters
-    /// - Returns: TOTP instance
-    /// - Throws: RFC_6238.Error if validation fails
     public static func from(migration params: MigrationParameters) throws(RFC_6238.Error) -> TOTP {
         try TOTP(
             base32Secret: params.secret,
@@ -49,11 +37,6 @@ extension TOTP {
         )
     }
 
-    /// Exports TOTP configuration as migration parameters
-    /// - Parameters:
-    ///   - issuer: The service issuer
-    ///   - accountName: The account name
-    /// - Returns: Migration parameters
     public func exportMigration(issuer: String, accountName: String) -> MigrationParameters {
         MigrationParameters(
             secret: RFC_6238.Base32.encode(secret),

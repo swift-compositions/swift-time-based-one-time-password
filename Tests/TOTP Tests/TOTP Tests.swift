@@ -1,10 +1,3 @@
-//
-//  TOTP Tests.swift
-//  swift-one-time-password
-//
-//  Created by Coen ten Thije Boonkkamp on 2025-08-20.
-//
-
 import Crypto
 import Dependencies
 import Dependencies_Test_Support
@@ -20,11 +13,9 @@ import Testing
 )
 struct Test {
 
-    // MARK: - RFC 6238 Test Vectors
-
     @Test
     func `RFC 6238 Test Vectors - SHA1`() throws {
-        // Test vectors from RFC 6238 Appendix B
+
         let secret = Array("12345678901234567890".utf8)
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha1)
 
@@ -53,7 +44,7 @@ struct Test {
 
     @Test
     func `RFC 6238 Test Vectors - SHA256`() throws {
-        // Test vectors from RFC 6238 Appendix B
+
         let secret = Array("12345678901234567890123456789012".utf8)
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha256)
 
@@ -82,7 +73,7 @@ struct Test {
 
     @Test
     func `RFC 6238 Test Vectors - SHA512`() throws {
-        // Test vectors from RFC 6238 Appendix B
+
         let secret = Array("1234567890123456789012345678901234567890123456789012345678901234".utf8)
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha512)
 
@@ -109,8 +100,6 @@ struct Test {
         }
     }
 
-    // MARK: - TOTP Generation and Validation
-
     @Test
     func `TOTP Generation and Validation`() throws {
         let secret = TOTP.generateSecret()
@@ -119,10 +108,8 @@ struct Test {
         let otp = totp.generate()
         #expect(otp.count == 6, "OTP should be 6 digits")
 
-        // Validate the current OTP
         #expect(totp.validate(otp), "Current OTP should be valid")
 
-        // Invalid OTP should fail
         #expect(!totp.validate("000000"), "Invalid OTP should not validate")
     }
 
@@ -134,35 +121,28 @@ struct Test {
         let testTime = Date(timeIntervalSince1970: 1_234_567_890)
         let otp = totp.generate(at: testTime)
 
-        // Should validate at exact time
         #expect(totp.validate(otp, at: testTime, window: 0))
 
-        // Should validate within window
-        let timeInWindow = Date(timeIntervalSince1970: 1_234_567_890 + 30)  // One time step later
+        let timeInWindow = Date(timeIntervalSince1970: 1_234_567_890 + 30)
         #expect(totp.validate(otp, at: timeInWindow, window: 1))
 
-        // Should not validate outside window: three time steps later
         let timeOutsideWindow = Date(timeIntervalSince1970: 1_234_567_890 + 90)
         #expect(!totp.validate(otp, at: timeOutsideWindow, window: 1))
     }
 
-    // MARK: - Secret Generation
-
     @Test
     func `Secret Generation`() {
-        // Test default length
+
         let secret1 = TOTP.generateSecret()
         let data1 = RFC_6238.Base32.decode(secret1)
         #expect(data1 != nil)
         #expect(data1?.count == 20, "Default secret should be 20 bytes")
 
-        // Test custom length
         let secret2 = TOTP.generateSecret(length: 32)
         let data2 = RFC_6238.Base32.decode(secret2)
         #expect(data2 != nil)
         #expect(data2?.count == 32, "Custom secret should be 32 bytes")
 
-        // Secrets should be different
         #expect(secret1 != secret2, "Generated secrets should be unique")
     }
 
@@ -179,29 +159,22 @@ struct Test {
         #expect(otp.count == 6)
     }
 
-    // MARK: - Factory Methods
-
     @Test
     func `Factory Methods`() throws {
         let secret = TOTP.generateSecret()
 
-        // Test SHA1 factory
         let sha1TOTP = try TOTP.sha1(base32Secret: secret)
         #expect(sha1TOTP.algorithm == .sha1)
         #expect(sha1TOTP.digits == 6)
 
-        // Test SHA256 factory
         let sha256TOTP = try TOTP.sha256(base32Secret: secret, digits: 8)
         #expect(sha256TOTP.algorithm == .sha256)
         #expect(sha256TOTP.digits == 8)
 
-        // Test SHA512 factory
         let sha512TOTP = try TOTP.sha512(base32Secret: secret)
         #expect(sha512TOTP.algorithm == .sha512)
         #expect(sha512TOTP.digits == 6)
     }
-
-    // MARK: - Provisioning URI
 
     @Test
     func `Provisioning URI`() throws {
@@ -210,7 +183,6 @@ struct Test {
 
         let uri = totp.provisioningURI(label: "alice@example.com", issuer: "ACME Corp")
 
-        // Parse the URI
         let url = URLComponents(string: uri)
         #expect(url != nil)
 
@@ -218,7 +190,6 @@ struct Test {
         #expect(url?.host == "totp")
         #expect(url?.path == "/alice@example.com")
 
-        // Check query parameters
         let queryItems = url?.queryItems ?? []
         let params = Dictionary(uniqueKeysWithValues: queryItems.map { ($0.name, $0.value ?? "") })
 
@@ -229,14 +200,11 @@ struct Test {
         #expect(params["issuer"] == "ACME Corp")
     }
 
-    // MARK: - Migration Support
-
     @Test
     func `Migration Parameters`() throws {
         let originalSecret = TOTP.generateSecret()
         let originalTOTP = try TOTP.sha256(base32Secret: originalSecret, digits: 8)
 
-        // Export migration parameters
         let params = originalTOTP.exportMigration(issuer: "TestApp", accountName: "user@test.com")
 
         #expect(params.secret == originalSecret)
@@ -246,7 +214,6 @@ struct Test {
         #expect(params.digits == 8)
         #expect(params.period == 30)
 
-        // Import from migration parameters
         let importedTOTP = try TOTP.from(migration: params)
 
         #expect(importedTOTP.secret == originalTOTP.secret)
@@ -254,8 +221,6 @@ struct Test {
         #expect(importedTOTP.digits == originalTOTP.digits)
         #expect(importedTOTP.timeStep == originalTOTP.timeStep)
     }
-
-    // MARK: - Time Remaining
 
     @Test
     func `Time Remaining`() throws {
@@ -265,13 +230,10 @@ struct Test {
         #expect(remaining > 0)
         #expect(remaining <= 30)
 
-        // Test at specific time
-        let testTime = Date(timeIntervalSince1970: 1_234_567_890)  // Known time
+        let testTime = Date(timeIntervalSince1970: 1_234_567_890)
         let remainingAtTest = totp.timeRemaining(at: testTime)
         #expect(abs(remainingAtTest - 30) < 0.001)
     }
-
-    // MARK: - Current OTP Property
 
     @Test
     func `Current OTP Property`() throws {
@@ -279,23 +241,18 @@ struct Test {
         let otp1 = totp.currentOTP
         let otp2 = totp.generate()
 
-        // Should be the same when called quickly in succession
         #expect(otp1 == otp2, "Current OTP should match generate()")
 
-        // Should validate
         #expect(totp.validate(otp1))
     }
 
-    // MARK: - Error Handling
-
     @Test
     func `Invalid Base32`() {
-        // Invalid characters
+
         #expect(throws: RFC_6238.Error.invalidBase32String) {
             _ = try TOTP(base32Secret: "INVALID!@#")
         }
 
-        // Empty string
         #expect(throws: RFC_6238.Error.emptySecret) {
             _ = try TOTP(base32Secret: "")
         }
@@ -303,33 +260,27 @@ struct Test {
 
     @Test
     func `TOTP Initialization Errors`() {
-        // Test empty secret
+
         #expect(throws: RFC_6238.Error.emptySecret) {
             _ = try TOTP(secret: [UInt8](), digits: 6)
         }
 
-        // Test invalid digits (too few)
         #expect(throws: RFC_6238.Error.self) {
             _ = try TOTP(secret: [UInt8](repeating: 0x42, count: 20), digits: 5)
         }
 
-        // Test invalid digits (too many)
         #expect(throws: RFC_6238.Error.self) {
             _ = try TOTP(secret: [UInt8](repeating: 0x42, count: 20), digits: 9)
         }
 
-        // Test invalid time step
         #expect(throws: RFC_6238.Error.self) {
             _ = try TOTP(secret: [UInt8](repeating: 0x42, count: 20), timeStep: 0)
         }
 
-        // Test negative time step
         #expect(throws: RFC_6238.Error.self) {
             _ = try TOTP(secret: [UInt8](repeating: 0x42, count: 20), timeStep: -30)
         }
     }
-
-    // MARK: - Symmetric Key Integration
 
     @Test
     func `Symmetric Key Integration`() throws {
@@ -344,8 +295,6 @@ struct Test {
         #expect(totp.validate(otp))
     }
 
-    // MARK: - Base32 Properties
-
     @Test
     func `Base32 Secret Property`() throws {
         let originalSecret = "JBSWY3DPEHPK3PXP"
@@ -354,7 +303,6 @@ struct Test {
         let exportedSecret = totp.base32Secret
         #expect(exportedSecret == originalSecret)
 
-        // Create new TOTP with exported secret
         let totp2 = try TOTP.sha1(base32Secret: exportedSecret)
         #expect(totp.secret == totp2.secret)
     }

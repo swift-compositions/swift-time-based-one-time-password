@@ -1,7 +1,6 @@
 import OneTimePasswordShared
 import Testing
 
-/// RFC 4648 Section 10 base32 test vectors: (ASCII input, base32 encoding).
 private let rfc4648Vectors: [(ascii: String, base32: String)] = [
     ("", ""),
     ("f", "MY======"),
@@ -12,10 +11,8 @@ private let rfc4648Vectors: [(ascii: String, base32: String)] = [
     ("foobar", "MZXW6YTBOI======"),
 ]
 
-/// The RFC 6238 Appendix B SHA-1 secret — ASCII "12345678901234567890" — in base32.
 private let rfc6238SecretBase32 = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
 
-/// The well-known public example secret used across TOTP documentation.
 private let exampleSecretBase32 = "JBSWY3DPEHPK3PXP"
 
 @Suite
@@ -77,7 +74,7 @@ struct `RFC_6238.Base32 Tests` {
 
         @Test
         func `Decode rejects characters outside the RFC 4648 alphabet`() {
-            // O and I are valid base32; 0, 1, 8, and 9 are not.
+
             #expect(RFC_6238.Base32.decode("OOOOOOOO") != nil)
             #expect(RFC_6238.Base32.decode("IIIIIIII") != nil)
             #expect(RFC_6238.Base32.decode("00000000") == nil)

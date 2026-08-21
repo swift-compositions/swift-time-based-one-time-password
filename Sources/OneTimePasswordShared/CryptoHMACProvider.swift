@@ -1,15 +1,7 @@
-//
-//  CryptoHMACProvider.swift
-//  swift-one-time-password
-//
-//  Created by Coen ten Thije Boonkkamp on 2025-08-20.
-//
-
 import Crypto
 import Foundation
 import RFC_6238
 
-/// HMAC provider implementation using swift-crypto
 public struct CryptoHMACProvider: RFC_6238.HMACProvider {
 
     public init() {}

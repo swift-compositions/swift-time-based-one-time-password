@@ -5,10 +5,8 @@ import OneTimePasswordShared
 import TOTP
 import Testing
 
-/// The RFC 6238 Appendix B SHA-1 secret — ASCII "12345678901234567890" — in base32.
 private let rfc6238SecretBase32 = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
 
-/// RFC 6238 Appendix B SHA-1 vectors: (Unix timestamp, 8-digit TOTP).
 private let rfc6238SHA1Vectors: [(time: TimeInterval, expected: String)] = [
     (59, "94287082"),
     (1_111_111_109, "07081804"),
@@ -32,7 +30,7 @@ struct `TOTP Clock Tests` {
                 withDependencies {
                     $0.date = .init { fixed }
                 } operation: {
-                    // generate() must read the injected clock, not the wall clock.
+
                     #expect(totp.generate() == vector.expected)
                     #expect(totp.generate() == totp.generate(at: fixed))
                 }
@@ -53,7 +51,7 @@ struct `TOTP Clock Tests` {
         @Test
         func `Code is constant within one time step`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
-            // All of [30, 60) is time step 1, whose published code is 94287082.
+
             for time: TimeInterval in [30, 45, 59] {
                 #expect(totp.generate(at: Date(timeIntervalSince1970: time)) == "94287082")
             }
@@ -80,8 +78,7 @@ struct `TOTP Clock Tests` {
 
         @Test
         func `Timezone-offset timestamps land whole steps away`() throws {
-            // Regression: a timestamp wrongly offset by a UTC+2 timezone (7200 s)
-            // moves exactly 240 steps and no longer yields the published code.
+
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             let time: TimeInterval = 1_111_111_109
             #expect(totp.counter(at: time + 7200) == totp.counter(at: time) + 240)
