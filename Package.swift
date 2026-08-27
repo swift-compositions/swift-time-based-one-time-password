@@ -37,7 +37,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto", from: "4.1.0"),
         .package(
-            url: "https://github.com/swift-foundations/swift-dependencies.git",
+            url: "https://github.com/swift-compositions/swift-dependencies.git",
             branch: "main"
         ),
         .package(url: "https://github.com/swift-ietf/swift-rfc-6238.git", branch: "main"),

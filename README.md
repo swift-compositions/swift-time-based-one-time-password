@@ -1,6 +1,6 @@
 # swift-one-time-password
 
-[![CI](https://github.com/swift-foundations/swift-time-based-one-time-password/workflows/CI/badge.svg)](https://github.com/swift-foundations/swift-time-based-one-time-password/actions/workflows/ci.yml)
+[![CI](https://github.com/swift-compositions/swift-time-based-one-time-password/workflows/CI/badge.svg)](https://github.com/swift-compositions/swift-time-based-one-time-password/actions/workflows/ci.yml)
 ![Development Status](https://img.shields.io/badge/status-active--development-blue.svg)
 
 Swift implementation of One-Time Password algorithms (TOTP and HOTP) based on [RFC 6238](https://www.rfc-editor.org/rfc/rfc6238.html) and [RFC 4226](https://www.rfc-editor.org/rfc/rfc4226.html).
@@ -27,7 +27,7 @@ Add this package to your Swift project:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-time-based-one-time-password.git", from: "0.1.0")
+    .package(url: "https://github.com/swift-compositions/swift-time-based-one-time-password.git", from: "0.1.0")
 ]
 ```
 
@@ -204,8 +204,8 @@ let hotpBase32 = try HOTP(base32Secret: "JBSWY3DPEHPK3PXP", algorithm: .sha256)
 - macOS 13.0+ / iOS 16.0+
 - Dependencies:
   - [swift-crypto](https://github.com/apple/swift-crypto) 3.0+
-  - [swift-rfc-6238](https://github.com/swift-web-standards/swift-rfc-6238) 0.0.2+
-  - [swift-dependencies](https://github.com/pointfreeco/swift-dependencies) 1.9.2+
+  - [swift-rfc-6238](https://github.com/swift-ietf/swift-rfc-6238) 0.0.2+
+  - [swift-dependencies](https://github.com/swift-compositions/swift-dependencies) 1.9.2+
 
 ## Testing
 
@@ -278,7 +278,7 @@ swift-one-time-password/
 
 ### Third-Party Dependencies
 
-- [pointfreeco/swift-dependencies](https://github.com/pointfreeco/swift-dependencies): A dependency management library for controlling dependencies in Swift.
+- [swift-dependencies](https://github.com/swift-compositions/swift-dependencies): A dependency management library for controlling dependencies in Swift.
 - [apple/swift-crypto](https://github.com/apple/swift-crypto): Open-source implementation of a substantial portion of the API of Apple CryptoKit.
 
 ## Contributing
