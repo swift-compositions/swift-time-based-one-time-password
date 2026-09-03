@@ -3,27 +3,6 @@
 import Foundation
 import PackageDescription
 
-extension String {
-    static let oneTimePasswordShared: Self = "OneTimePasswordShared"
-    static let totp: Self = "TOTP"
-    static let hotp: Self = "HOTP"
-}
-
-extension Target.Dependency {
-    static var oneTimePasswordShared: Self { .target(name: .oneTimePasswordShared) }
-    static var totp: Self { .target(name: .totp) }
-    static var hotp: Self { .target(name: .hotp) }
-}
-
-extension Target.Dependency {
-    static var crypto: Self { .product(name: "Crypto", package: "swift-crypto") }
-    static var dependencies: Self { .product(name: "Dependencies", package: "swift-dependencies") }
-    static var dependenciesTestSupport: Self {
-        .product(name: "Dependencies Test Support", package: "swift-dependencies")
-    }
-    static var rfc6238: Self { .product(name: "RFC 6238", package: "swift-rfc-6238") }
-}
-
 let package = Package(
     name: "swift-time-based-one-time-password",
     platforms: [
@@ -31,8 +10,8 @@ let package = Package(
         .iOS(.v27),
     ],
     products: [
-        .library(name: .totp, targets: [.totp]),
-        .library(name: .hotp, targets: [.hotp]),
+        .library(name: "TOTP", targets: ["TOTP"]),
+        .library(name: "HOTP", targets: ["HOTP"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto", from: "4.1.0"),
@@ -44,44 +23,43 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: .oneTimePasswordShared,
+            name: "OneTimePasswordShared",
             dependencies: [
-                .rfc6238,
-                .crypto,
+                .product(name: "RFC 6238", package: "swift-rfc-6238"),
+                .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),
         .target(
-            name: .totp,
+            name: "TOTP",
             dependencies: [
-                .oneTimePasswordShared,
-                .dependencies,
+                .target(name: "OneTimePasswordShared"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
             ]
         ),
         .target(
-            name: .hotp,
+            name: "HOTP",
             dependencies: [
-                .oneTimePasswordShared
+                .target(name: "OneTimePasswordShared")
             ]
         ),
         .testTarget(
-            name: .totp.tests,
+            name: "TOTP Tests",
             dependencies: [
-                .totp,
-                .hotp,
-                .dependenciesTestSupport,
-                .crypto,
+                .target(name: "TOTP"),
+                .target(name: "HOTP"),
+                .product(name: "Dependencies Test Support", package: "swift-dependencies"),
+                .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),
         .testTarget(
-            name: .hotp.tests,
+            name: "HOTP Tests",
             dependencies: [
-                .hotp,
-                .dependenciesTestSupport,
-                .crypto,
+                .target(name: "HOTP"),
+                .product(name: "Dependencies Test Support", package: "swift-dependencies"),
+                .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),
     ],
     swiftLanguageModes: [.v6]
 )
 
-extension String { var tests: Self { self + " Tests" } }
