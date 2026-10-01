@@ -1,13 +1,12 @@
 import Dependencies
 import Dependencies_Test_Support
-import Foundation
 import OneTimePasswordShared
 import TOTP
 import Testing
 
 private let rfc6238SecretBase32 = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"
 
-private let rfc6238SHA1Vectors: [(time: TimeInterval, expected: String)] = [
+private let rfc6238SHA1Vectors: [(time: Double, expected: String)] = [
     (59, "94287082"),
     (1_111_111_109, "07081804"),
     (1_111_111_111, "14050471"),
@@ -26,7 +25,7 @@ struct `TOTP Clock Tests` {
         func `Overridden date dependency drives generate()`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
-                let fixed = Date(timeIntervalSince1970: vector.time)
+                let fixed = Fixture.date(vector.time)
                 withDependencies {
                     $0.date = .init { fixed }
                 } operation: {
@@ -52,16 +51,16 @@ struct `TOTP Clock Tests` {
         func `Code is constant within one time step`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
 
-            for time: TimeInterval in [30, 45, 59] {
-                #expect(totp.generate(at: Date(timeIntervalSince1970: time)) == "94287082")
+            for time: Double in [30, 45, 59] {
+                #expect(totp.generate(at: Fixture.date(time)) == "94287082")
             }
         }
 
         @Test
         func `Time remaining counts down to the step boundary`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
-            #expect(totp.timeRemaining(at: Date(timeIntervalSince1970: 59)) == 1)
-            #expect(totp.timeRemaining(at: Date(timeIntervalSince1970: 60)) == 30)
+            #expect(totp.timeRemaining(at: Fixture.date(59)) == 1)
+            #expect(totp.timeRemaining(at: Fixture.date(60)) == 30)
         }
     }
 
@@ -73,16 +72,16 @@ struct `TOTP Clock Tests` {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             #expect(totp.counter(at: 59) == 1)
             #expect(totp.counter(at: 60) == 2)
-            #expect(totp.generate(at: Date(timeIntervalSince1970: 60)) != "94287082")
+            #expect(totp.generate(at: Fixture.date(60)) != "94287082")
         }
 
         @Test
         func `Timezone-offset timestamps land whole steps away`() throws {
 
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
-            let time: TimeInterval = 1_111_111_109
+            let time: Double = 1_111_111_109
             #expect(totp.counter(at: time + 7200) == totp.counter(at: time) + 240)
-            #expect(totp.generate(at: Date(timeIntervalSince1970: time + 7200)) != "07081804")
+            #expect(totp.generate(at: Fixture.date(time + 7200)) != "07081804")
         }
     }
 
@@ -93,7 +92,7 @@ struct `TOTP Clock Tests` {
         func `Base32 secret initialization matches the RFC 6238 SHA1 vectors`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
-                let code = totp.generate(at: Date(timeIntervalSince1970: vector.time))
+                let code = totp.generate(at: Fixture.date(vector.time))
                 #expect(
                     code == vector.expected,
                     "at \(vector.time) expected \(vector.expected), got \(code)"
@@ -110,7 +109,7 @@ struct `TOTP Clock Tests` {
             )
             let sixDigit = try TOTP(base32Secret: rfc6238SecretBase32, digits: 6, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
-                let date = Date(timeIntervalSince1970: vector.time)
+                let date = Fixture.date(vector.time)
                 let code = sixDigit.generate(at: date)
                 #expect(code == String(vector.expected.suffix(6)))
                 #expect(code == String(eightDigit.generate(at: date).suffix(6)))

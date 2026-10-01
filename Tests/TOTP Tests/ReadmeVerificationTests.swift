@@ -1,7 +1,6 @@
 import Crypto
 import Dependencies
 import Dependencies_Test_Support
-import Foundation
 import OneTimePasswordShared
 import Testing
 
@@ -9,7 +8,7 @@ import Testing
 @testable import TOTP
 
 @Suite(
-    .dependency(\.date, .init { Date() })
+    .dependency(\.date, .init { Fixture.now() })
 )
 struct `README Verification` {
 
@@ -150,7 +149,7 @@ struct `README Verification` {
     func `README Example - Testing with Dependency Injection (lines 230-244)`() throws {
 
         try withDependencies {
-            $0.date = .constant(Date(timeIntervalSince1970: 1_234_567_890))
+            $0.date = .constant(Fixture.date(1_234_567_890))
         } operation: {
             let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
             let code = totp.generate()

@@ -1,7 +1,6 @@
 import Crypto
 import Dependencies
 import Dependencies_Test_Support
-import Foundation
 import OneTimePasswordShared
 import Testing
 
@@ -9,7 +8,7 @@ import Testing
 
 @Suite(
 
-    .dependency(\.date, .init { Date() })
+    .dependency(\.date, .init { Fixture.now() })
 )
 struct Test {
 
@@ -20,7 +19,7 @@ struct Test {
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha1)
 
         struct TestVector {
-            let time: TimeInterval
+            let time: Double
             let expected: String
         }
 
@@ -34,7 +33,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Date(timeIntervalSince1970: vector.time))
+            let otp = totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA1 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -49,7 +48,7 @@ struct Test {
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha256)
 
         struct TestVector {
-            let time: TimeInterval
+            let time: Double
             let expected: String
         }
 
@@ -63,7 +62,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Date(timeIntervalSince1970: vector.time))
+            let otp = totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA256 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -78,7 +77,7 @@ struct Test {
         let totp = try TOTP(secret: secret, digits: 8, algorithm: .sha512)
 
         struct TestVector {
-            let time: TimeInterval
+            let time: Double
             let expected: String
         }
 
@@ -92,7 +91,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Date(timeIntervalSince1970: vector.time))
+            let otp = totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA512 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -118,15 +117,15 @@ struct Test {
         let secret = "JBSWY3DPEHPK3PXP"
         let totp = try TOTP.sha1(base32Secret: secret)
 
-        let testTime = Date(timeIntervalSince1970: 1_234_567_890)
+        let testTime = Fixture.date(1_234_567_890)
         let otp = totp.generate(at: testTime)
 
         #expect(totp.validate(otp, at: testTime, window: 0))
 
-        let timeInWindow = Date(timeIntervalSince1970: 1_234_567_890 + 30)
+        let timeInWindow = Fixture.date(1_234_567_890 + 30)
         #expect(totp.validate(otp, at: timeInWindow, window: 1))
 
-        let timeOutsideWindow = Date(timeIntervalSince1970: 1_234_567_890 + 90)
+        let timeOutsideWindow = Fixture.date(1_234_567_890 + 90)
         #expect(!totp.validate(otp, at: timeOutsideWindow, window: 1))
     }
 
@@ -183,7 +182,7 @@ struct Test {
 
         let uri = totp.provisioningURI(label: "alice@example.com", issuer: "ACME Corp")
 
-        let url = URLComponents(string: uri)
+        let url = Fixture.components(of: uri)
         #expect(url != nil)
 
         #expect(url?.scheme == "otpauth")
@@ -230,7 +229,7 @@ struct Test {
         #expect(remaining > 0)
         #expect(remaining <= 30)
 
-        let testTime = Date(timeIntervalSince1970: 1_234_567_890)
+        let testTime = Fixture.date(1_234_567_890)
         let remainingAtTest = totp.timeRemaining(at: testTime)
         #expect(abs(remainingAtTest - 30) < 0.001)
     }

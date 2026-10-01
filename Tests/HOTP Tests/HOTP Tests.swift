@@ -1,4 +1,3 @@
-import Foundation
 import OneTimePasswordShared
 import Testing
 
