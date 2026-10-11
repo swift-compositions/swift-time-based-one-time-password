@@ -17,14 +17,14 @@ struct `README Verification` {
 
         let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
 
-        let code = totp.generate()
+        let code = try totp.generate()
         #expect(!code.isEmpty)
         #expect(code.count == 6)
 
-        let currentCode = totp.currentOTP
+        let currentCode = try totp.currentOTP
         #expect(!currentCode.isEmpty)
 
-        if totp.validate(code) {
+        if try totp.validate(code) {
 
         }
 
@@ -40,7 +40,7 @@ struct `README Verification` {
         #expect(!secret.isEmpty)
 
         let totp = try TOTP.generateNew(algorithm: .sha256, digits: 6)
-        let code = totp.generate()
+        let code = try totp.generate()
         #expect(code.count == 6)
 
         let base32Secret = totp.base32Secret
@@ -81,13 +81,13 @@ struct `README Verification` {
     func `README Example - Time Window Validation (lines 115-129)`() throws {
 
         let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
-        let userInput = totp.generate()
+        let userInput = try totp.generate()
 
-        let validWithWindow = totp.validate(userInput, window: 1)
+        let validWithWindow = try totp.validate(userInput, window: 1)
 
         #expect(validWithWindow)
 
-        let validExact = totp.validate(userInput, window: 0)
+        let validExact = try totp.validate(userInput, window: 0)
 
         #expect(validExact)
     }
@@ -106,7 +106,7 @@ struct `README Verification` {
         #expect(params.accountName == "user@example.com")
 
         let imported = try TOTP.from(migration: params)
-        let code = imported.generate()
+        let code = try imported.generate()
         #expect(code.count == 6)
     }
 
@@ -116,14 +116,14 @@ struct `README Verification` {
         let secret = Array("12345678901234567890".utf8)
         let hotp = try HOTP(secret: secret, digits: 6)
 
-        let code = hotp.generate(counter: 1, using: CryptoHMACProvider())
+        let code = try hotp.generate(counter: 1, using: CryptoHMACProvider())
         #expect(code.count == 6)
 
-        let nextCode = hotp.generate(counter: 2, using: CryptoHMACProvider())
+        let nextCode = try hotp.generate(counter: 2, using: CryptoHMACProvider())
         #expect(nextCode.count == 6)
         #expect(code != nextCode)
 
-        let isValid = hotp.validate(code, counter: 1)
+        let isValid = try hotp.validate(code, counter: 1)
         #expect(isValid)
     }
 
@@ -133,15 +133,15 @@ struct `README Verification` {
         let secret = Array("12345678901234567890".utf8)
 
         let hotp256 = try HOTP(secret: secret, digits: 6, algorithm: .sha256)
-        let code256 = hotp256.generate(counter: 1, using: CryptoHMACProvider())
+        let code256 = try hotp256.generate(counter: 1, using: CryptoHMACProvider())
         #expect(code256.count == 6)
 
         let hotp512 = try HOTP(secret: secret, digits: 8, algorithm: .sha512)
-        let code512 = hotp512.generate(counter: 1, using: CryptoHMACProvider())
+        let code512 = try hotp512.generate(counter: 1, using: CryptoHMACProvider())
         #expect(code512.count == 8)
 
         let hotpBase32 = try HOTP(base32Secret: "JBSWY3DPEHPK3PXP", algorithm: .sha256)
-        let codeBase32 = hotpBase32.generate(counter: 1, using: CryptoHMACProvider())
+        let codeBase32 = try hotpBase32.generate(counter: 1, using: CryptoHMACProvider())
         #expect(codeBase32.count == 6)
     }
 
@@ -152,7 +152,7 @@ struct `README Verification` {
             $0.date = .constant(Fixture.date(1_234_567_890))
         } operation: {
             let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
-            let code = totp.generate()
+            let code = try totp.generate()
 
             #expect(code.count == 6)
         }
@@ -173,9 +173,9 @@ struct `README Verification` {
         let totp = try TOTP(symmetricKey: key, algorithm: .sha256)
 
         #expect(totp.algorithm == .sha256)
-        let code = totp.generate()
+        let code = try totp.generate()
         #expect(code.count == 6)
-        #expect(totp.validate(code))
+        #expect(try totp.validate(code))
     }
 
     @Test

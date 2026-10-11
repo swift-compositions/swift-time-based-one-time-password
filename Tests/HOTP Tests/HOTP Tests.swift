@@ -18,7 +18,7 @@ struct Test {
         ]
 
         for (counter, expected) in expectedValues.enumerated() {
-            let otp = hotp.generate(counter: UInt64(counter), using: CryptoHMACProvider())
+            let otp = try hotp.generate(counter: UInt64(counter), using: CryptoHMACProvider())
             #expect(
                 otp == expected,
                 "HOTP counter \(counter) should generate \(expected), got \(otp)"
@@ -31,16 +31,16 @@ struct Test {
         let secret = Array("12345678901234567890".utf8)
 
         let hotp6 = try HOTP(secret: secret, digits: 6)
-        let otp6 = hotp6.generate(counter: 0, using: CryptoHMACProvider())
+        let otp6 = try hotp6.generate(counter: 0, using: CryptoHMACProvider())
         #expect(otp6.count == 6)
         #expect(otp6 == "755224")
 
         let hotp7 = try HOTP(secret: secret, digits: 7)
-        let otp7 = hotp7.generate(counter: 0, using: CryptoHMACProvider())
+        let otp7 = try hotp7.generate(counter: 0, using: CryptoHMACProvider())
         #expect(otp7.count == 7)
 
         let hotp8 = try HOTP(secret: secret, digits: 8)
-        let otp8 = hotp8.generate(counter: 0, using: CryptoHMACProvider())
+        let otp8 = try hotp8.generate(counter: 0, using: CryptoHMACProvider())
         #expect(otp8.count == 8)
     }
 
@@ -50,15 +50,15 @@ struct Test {
         let counter: UInt64 = 12345
 
         let hotpSHA1 = try HOTP(secret: secret, digits: 6, algorithm: .sha1)
-        let otpSHA1 = hotpSHA1.generate(counter: counter, using: CryptoHMACProvider())
+        let otpSHA1 = try hotpSHA1.generate(counter: counter, using: CryptoHMACProvider())
         #expect(otpSHA1.count == 6)
 
         let hotpSHA256 = try HOTP(secret: secret, digits: 6, algorithm: .sha256)
-        let otpSHA256 = hotpSHA256.generate(counter: counter, using: CryptoHMACProvider())
+        let otpSHA256 = try hotpSHA256.generate(counter: counter, using: CryptoHMACProvider())
         #expect(otpSHA256.count == 6)
 
         let hotpSHA512 = try HOTP(secret: secret, digits: 6, algorithm: .sha512)
-        let otpSHA512 = hotpSHA512.generate(counter: counter, using: CryptoHMACProvider())
+        let otpSHA512 = try hotpSHA512.generate(counter: counter, using: CryptoHMACProvider())
         #expect(otpSHA512.count == 6)
 
         #expect(otpSHA1 != otpSHA256)
@@ -72,7 +72,7 @@ struct Test {
         let hotp = try HOTP(secret: secret, digits: 6)
 
         let maxCounter = UInt64.max
-        let otp = hotp.generate(counter: maxCounter, using: CryptoHMACProvider())
+        let otp = try hotp.generate(counter: maxCounter, using: CryptoHMACProvider())
         #expect(otp.count == 6)
     }
 
@@ -81,7 +81,7 @@ struct Test {
         let base32Secret = "JBSWY3DPEHPK3PXP"
         let hotp = try HOTP(base32Secret: base32Secret, digits: 6)
 
-        let otp = hotp.generate(counter: 0, using: CryptoHMACProvider())
+        let otp = try hotp.generate(counter: 0, using: CryptoHMACProvider())
         #expect(otp.count == 6)
     }
 

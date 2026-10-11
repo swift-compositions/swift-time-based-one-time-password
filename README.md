@@ -54,14 +54,14 @@ import TOTP
 let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
 
 // Generate current OTP
-let code = totp.generate()
+let code = try totp.generate()
 print("Current OTP: \(code)")
 
 // Or use the convenience property
-let currentCode = totp.currentOTP
+let currentCode = try totp.currentOTP
 
 // Validate an OTP
-if totp.validate("123456") {
+if try totp.validate("123456") {
     print("Valid OTP!")
 }
 
@@ -78,7 +78,7 @@ let secret = TOTP.generateSecret() // Default 20 bytes for SHA1
 
 // Create TOTP with newly generated secret
 let totp = try TOTP.generateNew(algorithm: .sha256, digits: 6)
-let code = totp.generate()
+let code = try totp.generate()
 
 // Get the base32 secret for sharing
 let base32Secret = totp.base32Secret
@@ -117,13 +117,13 @@ let uri = totp.provisioningURI(
 ```swift
 // Validate with time window (allows codes from adjacent time steps)
 // Useful for handling clock skew between client and server
-if totp.validate(userInput, window: 1) {
+if try totp.validate(userInput, window: 1) {
     // Valid within ±1 time step (usually ±30 seconds)
     print("Authentication successful!")
 }
 
 // Stricter validation (exact time step only)
-if totp.validate(userInput, window: 0) {
+if try totp.validate(userInput, window: 0) {
     // Valid only for current 30-second window
 }
 ```
@@ -139,7 +139,7 @@ let params = totp.exportMigration(
 
 // Import from migration parameters
 let imported = try TOTP.from(migration: params)
-let code = imported.generate()
+let code = try imported.generate()
 
 // This is useful for importing/exporting from authenticator apps
 ```
@@ -156,14 +156,14 @@ let secret = "12345678901234567890".data(using: .ascii)!
 let hotp = try HOTP(secret: secret, digits: 6)
 
 // Generate OTP for counter value
-let code = hotp.generate(counter: 1)
+let code = try hotp.generate(counter: 1)
 print("OTP for counter 1: \(code)")
 
 // Increment counter for next code
-let nextCode = hotp.generate(counter: 2)
+let nextCode = try hotp.generate(counter: 2)
 
 // Validate a code for a specific counter
-if hotp.validate("123456", counter: 3) {
+if try hotp.validate("123456", counter: 3) {
     print("Valid HOTP!")
 }
 ```
@@ -173,11 +173,11 @@ if hotp.validate("123456", counter: 3) {
 ```swift
 // SHA256 (more secure than SHA1)
 let hotp256 = try HOTP(secret: secret, digits: 6, algorithm: .sha256)
-let code256 = hotp256.generate(counter: 1)
+let code256 = try hotp256.generate(counter: 1)
 
 // SHA512 (maximum security)
 let hotp512 = try HOTP(secret: secret, digits: 8, algorithm: .sha512)
-let code512 = hotp512.generate(counter: 1)
+let code512 = try hotp512.generate(counter: 1)
 
 // From base32 secret
 let hotpBase32 = try HOTP(base32Secret: "JBSWY3DPEHPK3PXP", algorithm: .sha256)
@@ -234,11 +234,11 @@ import Dependencies
 @testable import TOTP
 
 @Test func testTOTPWithFixedTime() async throws {
-    await withDependencies {
+    try await withDependencies {
         $0.date = .constant(Date(timeIntervalSince1970: 1234567890))
     } operation: {
         let totp = try TOTP.sha1(base32Secret: "JBSWY3DPEHPK3PXP")
-        let code = totp.generate()
+        let code = try totp.generate()
         #expect(code == "expected_code")
     }
 }

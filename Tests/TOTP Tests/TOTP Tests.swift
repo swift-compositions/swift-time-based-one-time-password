@@ -33,7 +33,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Fixture.date(vector.time))
+            let otp = try totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA1 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -62,7 +62,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Fixture.date(vector.time))
+            let otp = try totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA256 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -91,7 +91,7 @@ struct Test {
         ]
 
         for vector in testVectors {
-            let otp = totp.generate(at: Fixture.date(vector.time))
+            let otp = try totp.generate(at: Fixture.date(vector.time))
             #expect(
                 otp == vector.expected,
                 "SHA512 at time \(vector.time) should be \(vector.expected), got \(otp)"
@@ -104,12 +104,12 @@ struct Test {
         let secret = TOTP.generateSecret()
         let totp = try TOTP.sha1(base32Secret: secret)
 
-        let otp = totp.generate()
+        let otp = try totp.generate()
         #expect(otp.count == 6, "OTP should be 6 digits")
 
-        #expect(totp.validate(otp), "Current OTP should be valid")
+        #expect(try totp.validate(otp), "Current OTP should be valid")
 
-        #expect(!totp.validate("000000"), "Invalid OTP should not validate")
+        #expect(try !totp.validate("000000"), "Invalid OTP should not validate")
     }
 
     @Test
@@ -118,15 +118,15 @@ struct Test {
         let totp = try TOTP.sha1(base32Secret: secret)
 
         let testTime = Fixture.date(1_234_567_890)
-        let otp = totp.generate(at: testTime)
+        let otp = try totp.generate(at: testTime)
 
-        #expect(totp.validate(otp, at: testTime, window: 0))
+        #expect(try totp.validate(otp, at: testTime, window: 0))
 
         let timeInWindow = Fixture.date(1_234_567_890 + 30)
-        #expect(totp.validate(otp, at: timeInWindow, window: 1))
+        #expect(try totp.validate(otp, at: timeInWindow, window: 1))
 
         let timeOutsideWindow = Fixture.date(1_234_567_890 + 90)
-        #expect(!totp.validate(otp, at: timeOutsideWindow, window: 1))
+        #expect(try !totp.validate(otp, at: timeOutsideWindow, window: 1))
     }
 
     @Test
@@ -154,7 +154,7 @@ struct Test {
         #expect(totp.timeStep == 30)
         #expect(totp.secret.count == 32, "SHA256 should use 32-byte key")
 
-        let otp = totp.generate()
+        let otp = try totp.generate()
         #expect(otp.count == 6)
     }
 
@@ -237,12 +237,12 @@ struct Test {
     @Test
     func `Current OTP Property`() throws {
         let totp = try TOTP.generateNew()
-        let otp1 = totp.currentOTP
-        let otp2 = totp.generate()
+        let otp1 = try totp.currentOTP
+        let otp2 = try totp.generate()
 
-        #expect(otp1 == otp2, "Current OTP should match generate()")
+        #expect(try otp1 == otp2, "Current OTP should match generate()")
 
-        #expect(totp.validate(otp1))
+        #expect(try totp.validate(otp1))
     }
 
     @Test
@@ -289,9 +289,9 @@ struct Test {
         #expect(totp.algorithm == .sha256)
         #expect(totp.secret.count == 32)
 
-        let otp = totp.generate()
+        let otp = try totp.generate()
         #expect(otp.count == 6)
-        #expect(totp.validate(otp))
+        #expect(try totp.validate(otp))
     }
 
     @Test

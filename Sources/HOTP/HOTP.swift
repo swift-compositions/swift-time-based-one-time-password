@@ -21,8 +21,8 @@ extension HOTP {
         try self.init(secret: secret, digits: digits, algorithm: algorithm)
     }
 
-    public func validate(_ otp: String, counter: UInt64) -> Bool {
-        let expected = generate(counter: counter, using: CryptoHMACProvider())
+    public func validate(_ otp: String, counter: UInt64) throws(RFC_6238.Error) -> Bool {
+        let expected = try generate(counter: counter, using: CryptoHMACProvider())
         return constantTimeCompare(otp, expected)
     }
 }

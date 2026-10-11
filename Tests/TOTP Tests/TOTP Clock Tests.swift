@@ -26,12 +26,13 @@ struct `TOTP Clock Tests` {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
                 let fixed = Fixture.date(vector.time)
-                withDependencies {
+                try withDependencies {
                     $0.date = .init { fixed }
                 } operation: {
 
-                    #expect(totp.generate() == vector.expected)
-                    #expect(totp.generate() == totp.generate(at: fixed))
+                    let code = try totp.generate()
+                    #expect(code == vector.expected)
+                    #expect(try code == totp.generate(at: fixed))
                 }
             }
         }
@@ -52,7 +53,7 @@ struct `TOTP Clock Tests` {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
 
             for time: Double in [30, 45, 59] {
-                #expect(totp.generate(at: Fixture.date(time)) == "94287082")
+                #expect(try totp.generate(at: Fixture.date(time)) == "94287082")
             }
         }
 
@@ -72,7 +73,7 @@ struct `TOTP Clock Tests` {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             #expect(totp.counter(at: 59) == 1)
             #expect(totp.counter(at: 60) == 2)
-            #expect(totp.generate(at: Fixture.date(60)) != "94287082")
+            #expect(try totp.generate(at: Fixture.date(60)) != "94287082")
         }
 
         @Test
@@ -81,7 +82,7 @@ struct `TOTP Clock Tests` {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             let time: Double = 1_111_111_109
             #expect(totp.counter(at: time + 7200) == totp.counter(at: time) + 240)
-            #expect(totp.generate(at: Fixture.date(time + 7200)) != "07081804")
+            #expect(try totp.generate(at: Fixture.date(time + 7200)) != "07081804")
         }
     }
 
@@ -92,7 +93,7 @@ struct `TOTP Clock Tests` {
         func `Base32 secret initialization matches the RFC 6238 SHA1 vectors`() throws {
             let totp = try TOTP(base32Secret: rfc6238SecretBase32, digits: 8, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
-                let code = totp.generate(at: Fixture.date(vector.time))
+                let code = try totp.generate(at: Fixture.date(vector.time))
                 #expect(
                     code == vector.expected,
                     "at \(vector.time) expected \(vector.expected), got \(code)"
@@ -110,9 +111,9 @@ struct `TOTP Clock Tests` {
             let sixDigit = try TOTP(base32Secret: rfc6238SecretBase32, digits: 6, algorithm: .sha1)
             for vector in rfc6238SHA1Vectors {
                 let date = Fixture.date(vector.time)
-                let code = sixDigit.generate(at: date)
+                let code = try sixDigit.generate(at: date)
                 #expect(code == String(vector.expected.suffix(6)))
-                #expect(code == String(eightDigit.generate(at: date).suffix(6)))
+                #expect(try code == String(eightDigit.generate(at: date).suffix(6)))
             }
         }
     }

@@ -12,29 +12,31 @@ extension TOTP {
 extension TOTP {
 
     public var currentOTP: String {
-        generate()
+        get throws(RFC_6238.Error) {
+            try generate()
+        }
     }
 
     public var base32Secret: String {
         RFC_6238.Base32.encode(secret)
     }
 
-    public func generate() -> String {
+    public func generate() throws(RFC_6238.Error) -> String {
         @Dependency(\.date) var date
-        return generate(at: date())
+        return try generate(at: date())
     }
 
-    public func generate(at time: Date) -> String {
-        generate(at: time.timeIntervalSince1970, using: CryptoHMACProvider())
+    public func generate(at time: Date) throws(RFC_6238.Error) -> String {
+        try generate(at: time.timeIntervalSince1970, using: CryptoHMACProvider())
     }
 
-    public func validate(_ otp: String, window: Int = 1) -> Bool {
+    public func validate(_ otp: String, window: Int = 1) throws(RFC_6238.Error) -> Bool {
         @Dependency(\.date) var date
-        return validate(otp, at: date(), window: window)
+        return try validate(otp, at: date(), window: window)
     }
 
-    public func validate(_ otp: String, at time: Date, window: Int = 1) -> Bool {
-        validate(otp, at: time.timeIntervalSince1970, window: window, using: CryptoHMACProvider())
+    public func validate(_ otp: String, at time: Date, window: Int = 1) throws(RFC_6238.Error) -> Bool {
+        try validate(otp, at: time.timeIntervalSince1970, window: window, using: CryptoHMACProvider())
     }
 
     public func timeRemaining() -> TimeInterval {
@@ -46,14 +48,14 @@ extension TOTP {
         timeRemaining(at: time.timeIntervalSince1970)
     }
 
-    public func generateSequence(count: Int = 2) -> [(otp: String, timeRemaining: TimeInterval)] {
+    public func generateSequence(count: Int = 2) throws(RFC_6238.Error) -> [(otp: String, timeRemaining: TimeInterval)] {
         @Dependency(\.date) var date
         let now = date()
         var results: [(String, TimeInterval)] = []
 
         for i in 0..<count {
             let time = Date(timeIntervalSince1970: now.timeIntervalSince1970 + Double(i) * timeStep)
-            let otp = generate(at: time)
+            let otp = try generate(at: time)
             let remaining = timeRemaining(at: time.timeIntervalSince1970)
             results.append((otp, remaining))
         }
