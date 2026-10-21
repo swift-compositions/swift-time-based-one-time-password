@@ -8,13 +8,11 @@ extension TOTP {
         try TOTP(base32Secret: base32Secret, digits: digits, algorithm: .sha1)
     }
 
-    public static func sha256(base32Secret: String, digits: Int = 6) throws(RFC_6238.Error) -> TOTP
-    {
+    public static func sha256(base32Secret: String, digits: Int = 6) throws(RFC_6238.Error) -> TOTP {
         try TOTP(base32Secret: base32Secret, digits: digits, algorithm: .sha256)
     }
 
-    public static func sha512(base32Secret: String, digits: Int = 6) throws(RFC_6238.Error) -> TOTP
-    {
+    public static func sha512(base32Secret: String, digits: Int = 6) throws(RFC_6238.Error) -> TOTP {
         try TOTP(base32Secret: base32Secret, digits: digits, algorithm: .sha512)
     }
 
